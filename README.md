@@ -1,6 +1,6 @@
 # ttf2png (a tool for parsing font to glyph image)
 
-ttf2png python provides parsing single glyph from font file and saving image file.
+ttf2png python provides parsing single glyph from truetype font and saving png image.
 
 ## Usage example
 
