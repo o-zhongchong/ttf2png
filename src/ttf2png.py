@@ -15,23 +15,43 @@ font_size = 48
 
 face = freetype.Face(ttf_file_path)
 face.set_char_size(font_size * 64)
-bitmap = face.glyph.bitmap
+slot = face.glyph
 
-for num in range(10):
-    face.load_char( chr(ord('0')+num) )
-    print("process char: %d"%num)
+text = "0123456789abcdefghijklmnokprstuvwxyz"
+
+width,height,baseline = 0,0,0
+previous = 0
+
+# compute bbox
+for i,c in enumerate(text):
+    face.load_char(c)
+    bitmap = slot.bitmap
+    height = max(height, bitmap.rows + max(0,-(slot.bitmap_top-bitmap.rows)))
+    baseline = max(baseline, max(0,-(slot.bitmap_top-bitmap.rows)))
+    width = max(width, slot.advance.x >> 6)
+
+# rendering and save image
+for i,c in enumerate(text):
+    print("process char: %c"%c)
+    face.load_char(c)
     
-    height=bitmap.rows
-    width=bitmap.width
-    channel=1
+    bitmap = slot.bitmap
+    top = slot.bitmap_top
+    left = slot.bitmap_left
+    h=bitmap.rows
+    w=bitmap.width
     
-    imgPath="images\\%d.png"%num
+    y = height-baseline-top
+    x = (width - w)/2
+    
+    imgPath="images\\%c.png"%c
     imgPath=os.path.join(cwd,imgPath)
-    img = np.zeros( (height,width,channel), np.uint8 )
+    img = np.zeros( (height,width,1), np.uint8 )
+    img.fill(255)
     
-    for row in range(height):
-        for col in range(width):
-            img[row][col] = 255 - bitmap.buffer[row*width + col]
+    for i in range(h):
+        for j in range(w):
+            img[y+i][x+j] = 255 - bitmap.buffer[i*w + j]
     
     cv2.imwrite(imgPath,img)
 
