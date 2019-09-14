@@ -17,7 +17,7 @@ face = freetype.Face(ttf_file_path)
 face.set_char_size(font_size * 64)
 slot = face.glyph
 
-text = "0123456789"
+text = "0123456789abcdefghijklmnokprstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 width,height,baseline = 0,0,0
 # compute bbox
@@ -26,7 +26,12 @@ for i,c in enumerate(text):
     bitmap = slot.bitmap
     baseline = max(baseline, max(0,-(slot.bitmap_top-bitmap.rows)))
     height = max(height, bitmap.rows + baseline)
-    width = max(width, slot.advance.x >> 6)
+    width += (slot.advance.x >> 6)
+
+imgPath="images\\_charmaps.png"
+imgPath=os.path.join(cwd,imgPath)
+img = np.zeros( (height,width,1), np.uint8 )
+img.fill(255)
 
 x,y = 0,0
 # rendering and save image
@@ -39,19 +44,15 @@ for i,c in enumerate(text):
     left = slot.bitmap_left
     h=bitmap.rows
     w=bitmap.width
-
-    y = height-baseline-top
-    x = left
     
-    imgPath="images\\%c.png"%c
-    imgPath=os.path.join(cwd,imgPath)
-    img = np.zeros( (height,width,1), np.uint8 )
-    img.fill(255)
+    y = height-baseline-top
+    x += left
     
     for i in range(h):
         for j in range(w):
             img[y+i][x+j] = 255 - bitmap.buffer[i*w + j]
-    
-    cv2.imwrite(imgPath,img)
+    x = x + (slot.advance.x >> 6) - left
+
+cv2.imwrite(imgPath,img)
 
 #os.system("pause")
